@@ -9,7 +9,8 @@ from product.filters import ProductFilter
 from rest_framework.filters import SearchFilter, OrderingFilter
 from product.paginations import DefaultPagination
 from rest_framework.permissions import IsAdminUser,AllowAny
-from api.permissions import IsAdminOrReadOnly
+from api.permissions import IsAdminOrReadOnly,FullDjangoModelPermissions
+from product.permissions import IsReviewAuthorOrReadOnly
 
 # Create your views here.
 class ProductViewSet(ModelViewSet):
@@ -22,11 +23,10 @@ class ProductViewSet(ModelViewSet):
     ordering_fields = ["price","updated_at"]
     # permission_classes = [IsAdminUser]
     permission_classes = [IsAdminOrReadOnly]
+    # permission_classes = [DjangoModelPermissions]
+    # permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
+    # permission_classes = [FullDjangoModelPermissions]
     
-    # def get_permissions(self):
-    #     if self.request.method == "GET":
-    #         return [AllowAny()]
-    #     return [IsAdminUser()]
 
     def destroy(self, request, *args, **kwargs):
         product = self.get_object()
@@ -42,6 +42,13 @@ class CategoryViewSet(ModelViewSet):
     
 class ReviewViewSet(ModelViewSet):
     serializer_class = ReviwSerializers
+    permission_classes = [IsReviewAuthorOrReadOnly]
+    
+    def perform_create(self, serializer):
+        serializer.save(user = self.request.user)
+        
+    def perform_update(self, serializer):
+        serializer.save(user=self.request.user)
     
     def get_queryset(self):
         return Review.objects.filter(product_id=self.kwargs["product_pk"])

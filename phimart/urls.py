@@ -6,7 +6,5 @@ from phimart.views import api_root_view
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", api_root_view),
-    path("auth/", include("djoser.urls")),
-    path("auth/", include("djoser.urls.jwt")),
     path("api/", include("api.urls"), name="api-root")
 ] + debug_toolbar_urls()
