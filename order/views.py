@@ -2,8 +2,11 @@ from django.shortcuts import render
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin
 from order.models import Cart, CartItem, Order, OrderItem
-from order.serializers import CartSerializer, CartItemsSerializer, CartUpdateSerializer, AddCartItemSerializer, OrderSerializers, CreateOrderSerializer, UpdateOrderSerializer
+from order.serializers import CartSerializer, CartItemsSerializer, CartUpdateSerializer, AddCartItemSerializer, OrderSerializers, CreateOrderSerializer, UpdateOrderSerializer, EmptySerializer
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.decorators import action
+from order.services import OrderServices
+from rest_framework.response import Response
 
 # Create your views here.
 class CartViewSet(CreateModelMixin, RetrieveModelMixin , DestroyModelMixin, GenericViewSet):
@@ -34,16 +37,32 @@ class CartItemViewSet(ModelViewSet):
     
 class OrderViewSet(ModelViewSet):
     http_method_names = ["get", 'post', 'patch', 'delete', 'head', 'option']
+
+    @action(detail=True, methods=['post'])
+    def cancel(self, request, pk=None):
+        order = self.get_object()
+        OrderServices.cancel_order(order=order, user=request.user)
+        return Response({'status': "Order Cancled"})
     
+    @action(detail=True, methods=["patch"])
+    def update_status(self, request, pk=None):
+        order = self.get_object()
+        serializer = UpdateOrderSerializer(order,data = request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"status": f"Order Status updated to {request.data['status']}"})
+
     def get_permissions(self):
-        if self.request.method == "DELETE":
+        if self.action in ['update-status', "destroy"]:
             return [IsAdminUser()]
         return [IsAuthenticated()]
 
     def get_serializer_class(self):
-        if self.request.method == "POST":
+        if self.action == "cancel":
+            return EmptySerializer
+        if self.action == "create":
             return CreateOrderSerializer
-        if self.request.method == "PATCH":
+        if self.action == "update_status":
             return UpdateOrderSerializer
         return OrderSerializers
     

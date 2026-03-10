@@ -118,17 +118,5 @@ class UpdateOrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = ["status"]
     
-    def update(self, instance, validated_data):
-        user = self.context['user']
-        new_status = validated_data['status']
-        
-        if new_status == Order.CANCELED:
-            return OrderServices.cancel_order(order=instance,user=user)
-        
-        if not user.is_staff:
-            raise serializers.ValidationError({"message": "You are not allowed to update"})
-        
-        # instance.satus = new_status
-        # instance.save()
-        # return instance
-        return super().update(instance,validated_data)
+class EmptySerializer(serializers.Serializer):
+    pass

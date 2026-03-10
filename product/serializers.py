@@ -29,23 +29,7 @@ class ProductSerializers(serializers.ModelSerializer):
     
     def calculate_tax(self, product):
         return round(product.price * Decimal(1.1), 2)
-    
-    """Object Validation"""
-    # def validate(self, attrs):
-    #     if attrs["password1"] != attrs["password2"]:
-    #         raise serializers.ValidationError("Passowrd did not match")
-        
-    """Override Create Method"""
-    # def create(self, validated_data):
-    #     product = Product(**validated_data)
-    #     product.other= 1
-    #     product.save()
-    #     return product
-    
-    """Override Update mathod"""
-    # def update(self, instance, validated_data):
-    #     instance.email = validated_data.get("email", instance.email)
-    #     return instance
+
     
 class SimpleUserSerializers(serializers.ModelSerializer):
     name = serializers.SerializerMethodField(
@@ -72,4 +56,7 @@ class ReviwSerializers(serializers.ModelSerializer):
     def create(self, validated_data):
         product_id = self.context["product_id"]
         return Review.objects.create(product_id=product_id, **validated_data)
-        
+    
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        pass
