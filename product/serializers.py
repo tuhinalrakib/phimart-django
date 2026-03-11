@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from decimal import Decimal
-from product.models import Category,Product, Review
+from product.models import Category,Product, Review, ProductImage
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
@@ -10,13 +10,20 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ["id","name","description","product_count"]
         
     product_count = serializers.IntegerField(read_only=True)
+    
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['id',"image"]
 
     
 class ProductSerializers(serializers.ModelSerializer):
+    images = ProductImageSerializer(many=True, read_only = True)
+    
     class Meta:
         model = Product
-        # fields = "__all__"
-        fields = ["id","name", "description","price","price_with_tax", "stock","created_at", "category"]
+        fields = ["id","name", "description","price","price_with_tax", "stock","created_at", "category","images"]
     
     price_with_tax = serializers.SerializerMethodField(method_name="calculate_tax")
     
@@ -57,6 +64,3 @@ class ReviwSerializers(serializers.ModelSerializer):
         product_id = self.context["product_id"]
         return Review.objects.create(product_id=product_id, **validated_data)
     
-class ProductImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        pass

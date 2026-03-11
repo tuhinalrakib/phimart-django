@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework import status
-from product.models import Product, Category, Review
-from product.serializers import ProductSerializers, CategorySerializer, ReviwSerializers
+from product.models import Product, Category, Review, ProductImage
+from product.serializers import ProductSerializers, CategorySerializer, ReviwSerializers, ProductImageSerializer
 from django.db.models import Count
 from rest_framework.viewsets import ModelViewSet
 from django_filters.rest_framework import DjangoFilterBackend
@@ -21,19 +21,18 @@ class ProductViewSet(ModelViewSet):
     pagination_class = DefaultPagination
     search_fields = ["name", "description", "category__name"]
     ordering_fields = ["price","updated_at"]
-    # permission_classes = [IsAdminUser]
     permission_classes = [IsAdminOrReadOnly]
-    # permission_classes = [DjangoModelPermissions]
-    # permission_classes = [DjangoModelPermissionsOrAnonReadOnly]
-    # permission_classes = [FullDjangoModelPermissions]
     
 
-    def destroy(self, request, *args, **kwargs):
-        product = self.get_object()
-        if product.stock > 10 :
-            return Response("Your Product Stock more than 10! You can't delete")
-        self.perform_destroy(product)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+class ProductImageViewSet(ModelViewSet):
+    serializer_class = ProductImageSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    
+    def get_queryset(self):
+        return ProductImage.objects.filter(product_id= self.kwargs['product_pk'])
+    
+    def perform_create(self, serializer):
+        serializer.save(product_id = self.kwargs["product_pk"])
 
 class CategoryViewSet(ModelViewSet):
     queryset = Category.objects.annotate(product_count=Count("products")).all()
@@ -55,3 +54,4 @@ class ReviewViewSet(ModelViewSet):
     
     def get_serializer_context(self):
         return {"product_id": self.kwargs["product_pk"]}
+    
