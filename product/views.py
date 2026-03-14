@@ -14,7 +14,7 @@ from product.permissions import IsReviewAuthorOrReadOnly
 
 # Create your views here.
 class ProductViewSet(ModelViewSet):
-    queryset = Product.objects.all()
+    queryset = Product.objects.prefetch_related("images").all()
     serializer_class = ProductSerializers
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_class = ProductFilter
