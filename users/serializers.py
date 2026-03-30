@@ -28,3 +28,4 @@ class UserSerializer(BaseUserSerializers):
             "is_staff",
             "is_active",
         ]
+        read_only_fields = ["is_staff", "is_active"]
