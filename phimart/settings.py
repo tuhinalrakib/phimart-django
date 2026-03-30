@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'djoser',
     "debug_toolbar",
     'django_filters',
+    "corsheaders",
     'api',
     'users',
     'product',
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     'django.middleware.security.SecurityMiddleware',
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -158,11 +160,15 @@ SIMPLE_JWT = {
    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
 
+"""Djoser Config"""
 DJOSER = {
-    # 'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
-    # 'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
-    # 'ACTIVATION_URL': 'activate/{uid}/{token}',
-    # 'SEND_ACTIVATION_EMAIL': True,
+    'EMAIL_FRONTEND_PROTOCOL' : config("FRONTEND_PROTOCOL"),
+    'EMAIL_FRONTEND_DOMAIN' : config('FRONTEND_DOMAIN'),
+    'EMAIL_FRONTEND_SITE_NAME' : 'phimart',
+    'PASSWORD_RESET_CONFIRM_URL': '/password/reset/confirm/{uid}/{token}',
+    # 'USERNAME_RESET_CONFIRM_URL': '/username/reset/confirm/{uid}/{token}',
+    'ACTIVATION_URL': 'activate/{uid}/{token}',
+    'SEND_ACTIVATION_EMAIL': True,
     'SERIALIZERS': {
         'user_create' : "users.serializers.UserCreateSerializer",
         'current_user': 'users.serializers.UserSerializer',
@@ -179,6 +185,10 @@ SWAGGER_SETTINGS = {
       }
    }
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
 
 EMAIL_BACKEND = config("EMAIL_BACKEND")
 EMAIL_HOST = config("EMAIL_HOST")
